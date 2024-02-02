@@ -2,37 +2,43 @@
 //	Подключение к БД
 include 'connection.php';
 
-//	Функция рекурсивно формирует список всех пунктов меню для добавления в файл
-function get_data($parent_id = "NULL", $parent_alias = '', $tab = 0)
+//	Функция получения данных меню из БД
+function get_menu_data()
 {
 	$connection = connection();
+	
 	$query = "SELECT * FROM `menu`";
-	if($parent_id == "NULL")
-	{
-		$query .= " WHERE `parent_id` IS NULL";
-	}
-	else
-	{
-		$query .= " WHERE `parent_id` = ". $parent_id;
-	}
 	$result_query = $connection->query($query);
+	
+	mysqli_close($connection);
+	
+	$data = array();
 	
 	if($result_query->num_rows > 0)
 	{
-		$line = "";
 		while($res = $result_query->fetch_assoc())
 		{
-			$alias = $parent_alias ."/". $res['alias'];
-			$line .= str_repeat("\t", $tab) . $res['name'] ." ". $alias  ."\n";
-			$line .= get_data($res['id'], $alias, $tab + 1);
+			array_push($data, $res);
 		}
 	}
-	else
-	{
-		$line = "";
-	}
 	
-	mysqli_close($connection);
+	return $data;
+}
+
+//	Функция рекурсивно формирует список всех пунктов меню для добавления в файл
+function get_data($data, $parent_id = null, $parent_alias = '', $tab = 0)
+{
+	$line = "";
+	
+	foreach($data as $category)
+	{
+		if($category['parent_id'] == $parent_id)
+		{
+			$alias = $parent_alias ."/". $category['alias'];
+			$line .= str_repeat("\t", $tab) . $category['name'] ." ". $alias  ."\n";
+			$line .= get_data($data, $category['id'], $alias, $tab + 1);
+		}
+	}
 	
 	return $line;
 }
@@ -45,31 +51,30 @@ if(isset($_POST['ajax']))
 		if($_POST['file_name'] == 'type_a')
 		{//	Файл с полным списком
 			$file = '/home/forVladlink/'. $_POST['file_name'] .'.txt';
-			file_put_contents($file, get_data());
+			file_put_contents($file, get_data(get_menu_data()));
 			
 			echo '/'. $_POST['file_name'] .'.txt';
 		}
 		elseif($_POST['file_name'] == 'type_b')
 		{//	Файл с первым уровнем вложености
-			$connection = connection();
-			$query = "SELECT * FROM `menu` WHERE `parent_id` IS NULL";
-			$result_query = $connection->query($query);
+			$menu_data = get_menu_data();
 			
 			$text = "";
 			
-			while($res = $result_query->fetch_assoc())
+			foreach($menu_data as $category)
 			{
-				$text .= $res['name'] ."\n";
-				$query = "SELECT * FROM `menu` WHERE `parent_id` = ". $res['id'];
-				$sub_result_query = $connection->query($query);
-				
-				while($sub_res = $sub_result_query->fetch_assoc())
+				if($category['parent_id'] == null)
 				{
-					$text .= "\t". $sub_res['name'] ."\n";
+					$text .= $category['name'] ."\n";
+					foreach($menu_data as $sub_category)
+					{
+						if($sub_category['parent_id'] == $category['id'])
+						{
+							$text .= "\t". $sub_category['name'] ."\n";
+						}
+					}
 				}
 			}
-			
-			mysqli_close($connection);
 			
 			file_put_contents('/home/forVladlink/'. $_POST['file_name'] .'.txt', $text);
 			
