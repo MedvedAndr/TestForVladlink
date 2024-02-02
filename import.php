@@ -33,17 +33,7 @@ function get_values($categories, $ids_in_db = array(), $parent_id = "NULL")
 $connection = connection();
 
 //	Создание таблицы, если она отсутствует
-$query	 = "CREATE TABLE IF NOT EXISTS `menu` (";
-$query	.=      "`ai_id` int(11) NOT NULL AUTO_INCREMENT,";
-$query	.=     " `id` int(11) DEFAULT NULL,";
-$query	.=     " `parent_id` int(11) DEFAULT NULL,";
-$query	.=     " `name` varchar(255) DEFAULT NULL,";
-$query	.=     " `alias` varchar(255) DEFAULT NULL,";
-$query	.=     "  PRIMARY KEY (ai_id)";
-$query	.= ")";
-$query	.= " ENGINE = INNODB,";
-$query	.= " CHARACTER SET utf8,";
-$query	.= " COLLATE utf8_general_ci";
+$query	 = "CREATE TABLE IF NOT EXISTS `menu` (`ai_id` int(11) NOT NULL AUTO_INCREMENT, `id` int(11) DEFAULT NULL, `parent_id` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL, `alias` varchar(255) DEFAULT NULL,  PRIMARY KEY (ai_id)) ENGINE = INNODB, CHARACTER SET utf8, COLLATE utf8_general_ci";
 $connection->query($query);
 
 //	Формируем перечень имеющихся id категорий в БД
@@ -68,12 +58,7 @@ $values = get_values($json_data, $curr_cat_ids);
 
 if(count($values) > 0)
 {
-	$query	 = "INSERT INTO `menu` (";
-	$query	.=      "`id`,";
-	$query	.=     " `parent_id`,";
-	$query	.=     " `name`,";
-	$query	.=     " `alias`";
-	$query	.= ") VALUES ". implode(', ', $values);
+	$query	 = "INSERT INTO `menu` (`id`, `parent_id`, `name`, `alias`) VALUES ". implode(', ', $values);
 	$connection->query($query);
 }
 
