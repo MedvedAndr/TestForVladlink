@@ -1,43 +1,31 @@
 <?php
-include 'connection.php';
+include 'ajax.php';
 
 //	Функция рекурсивно формирует список всех пунктов меню для вывода на странице
-function get_data($parent_id = "NULL")
+function get_menu_list($data, $parent_id = null)
 {
-	$connection = connection();
-	$query = "SELECT * FROM `menu`";
-	if($parent_id == "NULL")
-	{
-		$query .= " WHERE `parent_id` IS NULL";
-	}
-	else
-	{
-		$query .= " WHERE `parent_id` = ". $parent_id;
-	}
-	$result_query = $connection->query($query);
+	$menu = '<ul>';
 	
-	if($result_query->num_rows > 0)
+	foreach($data as $category)
 	{
-		$menu = '<ul>';
-		
-		while($res = $result_query->fetch_assoc())
+		if($category['parent_id'] == $parent_id)
 		{
 			$menu .= '<li>';
-			$menu .= $res['name'];
-			$menu .= get_data($res['id']);
+			$menu .= $category['name'];
+			$menu .= get_menu_list($data, $category['id']);
 			$menu .= '</li>';
 		}
-		
-		$menu .= '</ul>';
-	}
-	else
-	{
-		$menu = '';
 	}
 	
-	mysqli_close($connection);
+	$menu .= '</ul>';
 	
 	return $menu;
+}
+
+//	Функция формирования меню
+function get_menu()
+{
+	return get_menu_list(get_menu_data());
 }
 ?>
 <!DOCTYPE html>
@@ -51,7 +39,7 @@ function get_data($parent_id = "NULL")
 		</div>
 		
 		<div>
-			<?php echo get_data(); ?>
+			<?php echo get_menu(); ?>
 		</div>
 	</body>
 </html>
