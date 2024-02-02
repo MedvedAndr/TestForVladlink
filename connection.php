@@ -11,7 +11,7 @@ function connection()
 $db = array(
 	'host'		=> 'localhost',
 	'login'		=> 'root',
-	'pass'		=> '!Xthtpyjue666z',
+	'pass'		=> 'pass',
 	'db_name'	=> 'menu_db'
 );
 ?>
