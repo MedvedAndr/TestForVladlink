@@ -32,10 +32,6 @@ function get_values($categories, $ids_in_db = array(), $parent_id = "NULL")
 
 $connection = connection();
 
-//	Создание таблицы, если она отсутствует
-$query	 = "CREATE TABLE IF NOT EXISTS `menu` (`ai_id` int(11) NOT NULL AUTO_INCREMENT, `id` int(11) DEFAULT NULL, `parent_id` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL, `alias` varchar(255) DEFAULT NULL,  PRIMARY KEY (ai_id)) ENGINE = INNODB, CHARACTER SET utf8, COLLATE utf8_general_ci";
-$connection->query($query);
-
 //	Формируем перечень имеющихся id категорий в БД
 $query	 = "SELECT `m`.`id` FROM `menu` AS `m`";
 $result_query = $connection->query($query);
